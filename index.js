@@ -3,7 +3,7 @@
 
 'use strict';
 
-var uuencode = require('../uuencode');
+var uuencode = require('uuencode');
 
 var m_LFSR_A;
 var m_LFSR_B;
