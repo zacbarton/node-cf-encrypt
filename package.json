@@ -1,7 +1,7 @@
 {
   "name": "cf-encrypt",
   "description": "Node.js implementation of the ColdFusion encrypt() and decrypt() functions.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "author": {
     "name": "Zac Barton"
   },
