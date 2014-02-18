@@ -1,0 +1,25 @@
+{
+  "name": "cf-encrypt",
+  "description": "Node.js implementation of the ColdFusion encrypt() and decrypt() functions.",
+  "version": "0.0.1",
+  "author": {
+    "name": "Zac Barton"
+  },
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zacbarton/node-cf-encrypt"
+  },
+  "dependencies": {
+    "uuencode": "*"
+  },
+  "keywords": [
+    "cf"
+    , "cfmx"
+    , "coldfusion"
+    , "encrypt"
+    , "decrypt"
+    , "CFMX_COMPAT"
+  ]
+}
