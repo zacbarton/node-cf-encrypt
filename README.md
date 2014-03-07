@@ -36,7 +36,7 @@ var decrypted = encrypt.decrypt('9)qkg4[0yK*wC58D46:!rYc=h>9<)Q', 'de2j+4tUt4KYV
 // something a bit more realistic
 ```
 
-Todo
+Running tests
 ----
 
-- Add test cases
+    $ npm test
