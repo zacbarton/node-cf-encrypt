@@ -6,7 +6,6 @@
     "name": "Zac Barton"
   },
   "scripts": {
-  	"prepublish": "npm prune --production",
   	"test": "make test"
   },
   "repository": {
