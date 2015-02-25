@@ -30,7 +30,7 @@ function transformString(key, inBytes) {
 	var outBytes = new Buffer(length);
 
 	for (var i = 0; i < length; ++i) {
-		var byte = inBytes.readUInt32LE(i, true); // http://web.cecs.pdx.edu/~harry/compilers/ASCIIChart.pdf
+		var byte = inBytes.readInt32LE(i, true); // http://web.cecs.pdx.edu/~harry/compilers/ASCIIChart.pdf
 		outBytes[i] = transformByte(byte);
 	}
 
