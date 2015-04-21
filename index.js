@@ -19,18 +19,81 @@ var m_ROT1_A = 0x80000000;
 var m_ROT1_B = 0xc0000000;
 var m_ROT1_C = 0xf0000000;
 
-function transformString(key, inBytes) {
+// public functions
+
+/**
+ * Encrypt a value
+ *
+ * @param {String} string - String to encrypt.
+ * @param {String} key - Key or seed used to encrypt the string.
+ * @param {String} [encoding=uu] - The binary encoding in which to represent the data as a string. Can be either 'uu', 'hex' or 'base64'.
+ * @returns {String} The encrypted value.
+ */
+function encrypt(inString, key, encoding) {
+	if (!encoding) {
+		encoding = 'uu';
+	}
+
+	var inBytes = new Buffer(inString);
+	var outString = transformString(inBytes, key);
+
+	if (encoding === 'base64') {
+		outString = outString.toString('base64');
+	} else if (encoding === 'hex') {
+		outString = outString.toString('hex').toUpperCase();
+	} else if (encoding === 'uu') {
+		outString = uuencode.encode(outString);
+	} else {
+		throw new Error('Invalid encoding');
+	}
+
+	return outString;
+}
+
+/**
+ * Decrypt a value
+ *
+ * @param {String} string - String to decrypt.
+ * @param {String} key - The key or seed that was used to encrypt the string.
+ * @param {String} [encoding=uu] - The binary encoding in which to represent the data as a string. Must be the same as the algorithm used to encrypt the string.
+ * @returns {Buffer} The decrypted value.
+ */
+function decrypt(inString, key, encoding) {
+	if (!encoding) {
+		encoding = 'uu';
+	}
+
+	var inBytes;
+	var outBytes;
+
+	if (encoding === 'base64') {
+		inBytes = new Buffer(inString, 'base64');
+	} else if (encoding === 'hex') {
+		inBytes = new Buffer(inString, 'hex');
+	} else if (encoding === 'uu') {
+		inBytes = uuencode.decode(inString);
+	} else {
+		throw new Error('Invalid encoding');
+	}
+
+	outBytes = transformString(inBytes, key);
+
+	return outBytes.toString();
+}
+
+// private helper functions
+function transformString(inBytes, key) {
 	m_LFSR_A = 0x13579bdf;
 	m_LFSR_B = 0x2468ace0;
 	m_LFSR_C = 0xfdb97531;
 
-	seedFromKey(key);
+	setKey(key);
 
 	var length = inBytes.length;
 	var outBytes = new Buffer(length);
 
 	for (var i = 0; i < length; ++i) {
-		var byte = inBytes.readInt32LE(i, true); // http://web.cecs.pdx.edu/~harry/compilers/ASCIIChart.pdf
+		var byte = inBytes.readInt8(i, true);
 		outBytes[i] = transformByte(byte);
 	}
 
@@ -69,23 +132,26 @@ function transformByte(target) {
 	}
 
 	target = target ^ crypto;
-	
+
 	return target;
 }
 
-function seedFromKey(key) {
-	var keyLength = key.length;
-	var seed = [keyLength < 12 ? 12 : keyLength];
+function setKey(key) {
+	key = key || 'Default Seed';
 
-	for (var i = 0; i < keyLength; i++) {
+	var i;
+	var keyLength = key.length;
+	var seed = new Array(Math.max(12, keyLength));
+
+	for (i = 0; i < keyLength; i++) {
 		seed[i] = key[i].charCodeAt(0);
 	}
 
-	for (var i = 0; keyLength + i < 12; ++i) {
+	for (i = 0; keyLength + i < 12; ++i) {
 		seed[keyLength + i] = seed[i];
 	}
 
-	for (var i = 0; i < 4; i++) {
+	for (i = 0; i < 4; i++) {
 		m_LFSR_A = (m_LFSR_A << 8) | seed[i + 4];
 		m_LFSR_B = (m_LFSR_B << 8) | seed[i + 4];
 		m_LFSR_C = (m_LFSR_C << 8) | seed[i + 4];
@@ -96,39 +162,8 @@ function seedFromKey(key) {
 	if (0 === m_LFSR_C) m_LFSR_C = 0xfdb97531;
 }
 
-function encrypt(key, text, encoding) {
-	if (!encoding) encoding = 'uu';
-
-	var outString;
-	var outBytes = transformString(key, new Buffer(text));
-
-	if (encoding === 'base64') {
-		outString = outBytes.toString('base64');
-	} else if (encoding === 'hex') {
-		outString = outBytes.toString('hex').toUpperCase();
-	} else if (encoding === 'uu') {
-		outString = uuencode.encode(outBytes);
-	}
-
-	return outString;
-}
-
-function decrypt(key, text, encoding) {
-	if (!encoding) encoding = 'uu';
-
-	if (encoding === 'base64') {
-		text = new Buffer(text, 'base64');
-	} else if (encoding === 'hex') {
-		text = new Buffer(text, 'hex');
-	} else if (encoding === 'uu') {
-		text = uuencode.decode(text);
-	}
-
-	var outBytes = transformString(key, new Buffer(text));
-	var outString = outBytes.toString();
-
-	return outString;
-}
-
-module.exports.encrypt = encrypt;
-module.exports.decrypt = decrypt;
+// exports
+module.exports = {
+	encrypt: encrypt
+	, decrypt: decrypt
+};
